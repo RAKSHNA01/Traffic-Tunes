@@ -22,10 +22,14 @@ TrafficTunes converts traffic honks into music. Higher congestion results in fas
 - Google Speech-to-Text API
 
 ## MVP Type
-Functional Prototype (No-Code)
+Functional Prototype 
+
+## Mini Code Demo
+This repository includes a simple HTML and JavaScript prototype that simulates traffic levels.
+The buttons represent AI-processed traffic congestion levels, and each level generates a different musical response.
 
 ## Demo Video
 (Add your YouTube or Google Drive link here)
 
-## Team
-- Your Name
+## Team name 
+  Neural Ninjas
