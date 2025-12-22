@@ -22,101 +22,65 @@ function startMic() {
     .catch(() => alert("Microphone access denied"));
 }
 
+// Traffic logic
 function generateTraffic() {
   const levels = ["Low", "Medium", "High"];
   const level = levels[Math.floor(Math.random() * levels.length)];
 
-  let time, mood;
+  let time, emoji;
 
   if (level === "Low") {
     time = "5–10 minutes";
-    mood = "Calm 🌊";
+    emoji = "🚗";
   } else if (level === "Medium") {
     time = "15–25 minutes";
-    mood = "Neutral 🌬";
+    emoji = "🚙🚕";
   } else {
     time = "40–60 minutes";
-    mood = "Stress Relief 🌧";
+    emoji = "🚗🚗🚗🚛";
   }
 
   document.getElementById("output").innerHTML = `
-    <p><strong>Traffic Level:</strong> ${level}</p>
-    <p><strong>Estimated Clearance:</strong> ${time}</p>
-    <p><strong>Emotional Sound:</strong> ${mood}</p>
+    <p><strong>Traffic Level:</strong> ${level} ${emoji}</p>
+    <p><strong>Estimated Clearance Time:</strong> ${time}</p>
+    <p><strong>Music Mode:</strong> Adaptive Xylophone 🎶</p>
   `;
 
-  playAmbientSound(level);
+  playMusic(level);
 }
 
-// 🎶 Emotional Sound Engine
-function playAmbientSound(level) {
-  stopAllSounds();
+// Music generator
+function playMusic(level) {
+  let notes, speed;
 
   if (level === "Low") {
-    playWaterSound();
+    notes = [400, 450, 500];
+    speed = 800;
   } else if (level === "Medium") {
-    playWindSound();
+    notes = [500, 600, 550, 650];
+    speed = 500;
   } else {
-    playRainSound();
+    notes = [700, 800, 900, 850, 950];
+    speed = 250;
   }
-}
 
-let activeNodes = [];
-
-function stopAllSounds() {
-  activeNodes.forEach(node => {
-    try { node.stop(); } catch {}
+  notes.forEach((freq, i) => {
+    setTimeout(() => playNote(freq), i * speed);
   });
-  activeNodes = [];
 }
 
-// 🌊 Water Sound (Soft waves)
-function playWaterSound() {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  osc.type = "sine";
-  osc.frequency.value = 180;
-
-  gain.gain.value = 0.05;
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.start();
-  activeNodes.push(osc);
-}
-
-// 🌬 Wind Sound (Airy noise)
-function playWindSound() {
+function playNote(freq) {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
   osc.type = "triangle";
-  osc.frequency.value = 100;
-
-  gain.gain.value = 0.04;
+  osc.frequency.value = freq;
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-  activeNodes.push(osc);
-}
-
-// 🌧 Rain Sound (Low relaxing hum)
-function playRainSound() {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  osc.type = "sawtooth";
-  osc.frequency.value = 70;
-
-  gain.gain.value = 0.03;
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.start();
-  activeNodes.push(osc);
+  gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+  osc.stop(audioCtx.currentTime + 0.4);
 }
