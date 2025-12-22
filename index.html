@@ -2,16 +2,24 @@
 <html>
 <head>
   <title>TrafficTunes</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🚦 TrafficTunes 🎵</h1>
-  <p>Turn traffic noise into music</p>
 
-  <button onclick="lowTraffic()">Low Traffic</button>
-  <button onclick="mediumTraffic()">Medium Traffic</button>
-  <button onclick="highTraffic()">High Traffic</button>
+  <div class="card">
+    <h1>🚦 TrafficTunes 🎵</h1>
+    <p class="tagline">Turn traffic noise into music</p>
 
-  <h2 id="result"></h2>
+    <input type="file" accept="audio/*" onchange="analyzeFile()" />
+
+    <button onclick="startMic()">🎤 Sense Live Traffic Noise</button>
+
+    <div class="output" id="output">
+      Upload or sense traffic noise to begin
+    </div>
+
+    <p class="footer">Powered by Google AI (Prototype)</p>
+  </div>
 
   <script src="script.js"></script>
 </body>
