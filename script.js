@@ -1,6 +1,8 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
+let activeNodes = [];
+
 function enableAudio() {
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
@@ -22,65 +24,91 @@ function startMic() {
     .catch(() => alert("Microphone access denied"));
 }
 
-// Traffic logic
+// Main traffic logic
 function generateTraffic() {
+  stopAllSounds();
+
   const levels = ["Low", "Medium", "High"];
   const level = levels[Math.floor(Math.random() * levels.length)];
 
-  let time, emoji;
+  let time, sound, emoji;
 
   if (level === "Low") {
     time = "5–10 minutes";
+    sound = "Calming Water Sounds 🌊";
     emoji = "🚗";
+    playWaterSound();
   } else if (level === "Medium") {
     time = "15–25 minutes";
+    sound = "Gentle Wind Sounds 🌬";
     emoji = "🚙🚕";
+    playWindSound();
   } else {
     time = "40–60 minutes";
-    emoji = "🚗🚗🚗🚛";
+    sound = "Relaxing Rain Sounds 🌧";
+    emoji = "🚗🚗🚛";
+    playRainSound();
   }
 
   document.getElementById("output").innerHTML = `
     <p><strong>Traffic Level:</strong> ${level} ${emoji}</p>
     <p><strong>Estimated Clearance Time:</strong> ${time}</p>
-    <p><strong>Music Mode:</strong> Adaptive Xylophone 🎶</p>
+    <p><strong>Sound Mode:</strong> ${sound}</p>
   `;
-
-  playMusic(level);
 }
 
-// Music generator
-function playMusic(level) {
-  let notes, speed;
-
-  if (level === "Low") {
-    notes = [400, 450, 500];
-    speed = 800;
-  } else if (level === "Medium") {
-    notes = [500, 600, 550, 650];
-    speed = 500;
-  } else {
-    notes = [700, 800, 900, 850, 950];
-    speed = 250;
-  }
-
-  notes.forEach((freq, i) => {
-    setTimeout(() => playNote(freq), i * speed);
+// Stop previous sounds
+function stopAllSounds() {
+  activeNodes.forEach(node => {
+    try { node.stop(); } catch {}
   });
+  activeNodes = [];
 }
 
-function playNote(freq) {
+// 🌊 Water sound (calm waves)
+function playWaterSound() {
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
-  osc.type = "triangle";
-  osc.frequency.value = freq;
+  osc.type = "sine";
+  osc.frequency.value = 180;
+  gain.gain.value = 0.04;
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-  gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-  osc.stop(audioCtx.currentTime + 0.4);
+  activeNodes.push(osc);
+}
+
+// 🌬 Wind sound (airy flow)
+function playWindSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "triangle";
+  osc.frequency.value = 120;
+  gain.gain.value = 0.035;
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  activeNodes.push(osc);
+}
+
+// 🌧 Rain sound (deep relaxing tone)
+function playRainSound() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "sawtooth";
+  osc.frequency.value = 70;
+  gain.gain.value = 0.03;
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  activeNodes.push(osc);
 }
