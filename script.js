@@ -1,76 +1,86 @@
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
 
+function enableAudio() {
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+// Upload simulation
 function analyzeFile() {
-  const levels = ["Low", "Medium", "High"];
-  const randomLevel = levels[Math.floor(Math.random() * levels.length)];
-  showResult(randomLevel);
-  playMusic(randomLevel);
+  enableAudio();
+  generateTraffic();
 }
 
+// Mic simulation
 function startMic() {
+  enableAudio();
+
   navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(() => {
-      const levels = ["Low", "Medium", "High"];
-      const randomLevel = levels[Math.floor(Math.random() * levels.length)];
-      showResult(randomLevel);
-      playMusic(randomLevel);
-    })
-    .catch(() => {
-      alert("Microphone access denied");
-    });
+    .then(() => generateTraffic())
+    .catch(() => alert("Microphone access denied"));
 }
 
-function showResult(level) {
-  let text = "";
+// Traffic logic
+function generateTraffic() {
+  const levels = ["Low", "Medium", "High"];
+  const level = levels[Math.floor(Math.random() * levels.length)];
+
+  let time, emoji;
 
   if (level === "Low") {
-    text = "🚗 Low Traffic\n🎵 Slow xylophone music playing";
+    time = "5–10 minutes";
+    emoji = "🚗";
   } else if (level === "Medium") {
-    text = "🚙 Medium Traffic\n🎵 Moderate xylophone music playing";
+    time = "15–25 minutes";
+    emoji = "🚙🚕";
   } else {
-    text = "🚗🚗🚗 High Traffic\n🎵 Fast & high-pitch xylophone music playing";
+    time = "40–60 minutes";
+    emoji = "🚗🚗🚗🚛";
   }
 
-  document.getElementById("output").innerText = text;
+  document.getElementById("output").innerHTML = `
+    <p><strong>Traffic Level:</strong> ${level} ${emoji}</p>
+    <p><strong>Estimated Clearance Time:</strong> ${time}</p>
+    <p><strong>Music Mode:</strong> Adaptive Xylophone 🎶</p>
+  `;
+
+  playMusic(level);
 }
 
+// Music generator
 function playMusic(level) {
-  let notes = [];
-  let tempo = 600;
+  let notes, speed;
 
   if (level === "Low") {
-    notes = [400, 500, 450];
-    tempo = 800;
+    notes = [400, 450, 500];
+    speed = 800;
   } else if (level === "Medium") {
     notes = [500, 600, 550, 650];
-    tempo = 500;
+    speed = 500;
   } else {
     notes = [700, 800, 900, 850, 950];
-    tempo = 250;
+    speed = 250;
   }
 
-  notes.forEach((freq, index) => {
-    setTimeout(() => {
-      playNote(freq);
-    }, index * tempo);
+  notes.forEach((freq, i) => {
+    setTimeout(() => playNote(freq), i * speed);
   });
 }
 
-function playNote(frequency) {
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
+function playNote(freq) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
 
-  oscillator.type = "triangle"; // xylophone-like
-  oscillator.frequency.value = frequency;
+  osc.type = "triangle";
+  osc.frequency.value = freq;
 
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
 
-  oscillator.start();
-  gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.01,
-    audioCtx.currentTime + 0.4
-  );
-  oscillator.stop(audioCtx.currentTime + 0.4);
+  osc.start();
+  gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+  osc.stop(audioCtx.currentTime + 0.4);
 }
