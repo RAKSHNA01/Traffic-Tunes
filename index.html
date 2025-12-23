@@ -1,24 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>TrafficTunes 🎶</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="overlay">
-    <div class="container">
-      <h1>🚦 TrafficTunes</h1>
-      <p>Upload traffic noise & relax with adaptive sound</p>
+<div class="overlay">
+  <div class="container">
+    <h1>🚦 TrafficTunes</h1>
+    <p>Sense traffic noise & relax</p>
 
-      <input type="file" id="audioFile" accept="audio/*">
-      <button onclick="processAudio()">Analyze & Play</button>
+    <!-- FILE UPLOAD -->
+    <input type="file" id="audioFile">
+    
+    <p>OR</p>
 
-      <div id="result">Waiting for audio...</div>
-    </div>
+    <!-- MIC BUTTON -->
+    <button onclick="startMic()">Use Microphone</button>
+    <button onclick="stopMic()">Stop & Analyze</button>
+
+    <div id="result">Waiting...</div>
   </div>
+</div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
