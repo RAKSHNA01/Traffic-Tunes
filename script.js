@@ -1,86 +1,76 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
+let oscillator;
 
-function enableAudio() {
+function processAudio() {
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
   }
+
+  const fileInput = document.getElementById("audioFile");
+  if (!fileInput.files.length) {
+    alert("Please upload a traffic noise file");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    audioCtx.decodeAudioData(e.target.result, buffer => {
+      analyzeNoise(buffer);
+    });
+  };
+
+  reader.readAsArrayBuffer(file);
 }
 
-// Upload simulation
-function analyzeFile() {
-  enableAudio();
-  generateTraffic();
-}
+function analyzeNoise(buffer) {
+  const data = buffer.getChannelData(0);
+  let sum = 0;
 
-// Mic simulation
-function startMic() {
-  enableAudio();
+  for (let i = 0; i < data.length; i++) {
+    sum += Math.abs(data[i]);
+  }
 
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(() => generateTraffic())
-    .catch(() => alert("Microphone access denied"));
-}
+  const avg = sum / data.length;
+  let traffic, time, freq;
 
-// Traffic logic
-function generateTraffic() {
-  const levels = ["Low", "Medium", "High"];
-  const level = levels[Math.floor(Math.random() * levels.length)];
-
-  let time, emoji;
-
-  if (level === "Low") {
+  if (avg < 0.02) {
+    traffic = "Low Traffic 🚗";
     time = "5–10 minutes";
-    emoji = "🚗";
-  } else if (level === "Medium") {
+    freq = 220;
+  } else if (avg < 0.05) {
+    traffic = "Medium Traffic 🚙";
     time = "15–25 minutes";
-    emoji = "🚙🚕";
+    freq = 140;
   } else {
+    traffic = "High Traffic 🚗🚗";
     time = "40–60 minutes";
-    emoji = "🚗🚗🚗🚛";
+    freq = 80;
   }
 
-  document.getElementById("output").innerHTML = `
-    <p><strong>Traffic Level:</strong> ${level} ${emoji}</p>
-    <p><strong>Estimated Clearance Time:</strong> ${time}</p>
-    <p><strong>Music Mode:</strong> Adaptive Xylophone 🎶</p>
+  playTone(freq);
+
+  document.getElementById("result").innerHTML = `
+    <b>Traffic Level:</b> ${traffic}<br>
+    <b>Estimated Clearance:</b> ${time}<br><br>
+    🎧 Adaptive calming sound playing...
   `;
-
-  playMusic(level);
 }
 
-// Music generator
-function playMusic(level) {
-  let notes, speed;
+function playTone(freq) {
+  if (oscillator) oscillator.stop();
 
-  if (level === "Low") {
-    notes = [400, 450, 500];
-    speed = 800;
-  } else if (level === "Medium") {
-    notes = [500, 600, 550, 650];
-    speed = 500;
-  } else {
-    notes = [700, 800, 900, 850, 950];
-    speed = 250;
-  }
+  oscillator = audioCtx.createOscillator();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-  notes.forEach((freq, i) => {
-    setTimeout(() => playNote(freq), i * speed);
-  });
-}
-
-function playNote(freq) {
-  const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
+  gain.gain.value = 0.05;
 
-  osc.type = "triangle";
-  osc.frequency.value = freq;
-
-  osc.connect(gain);
+  oscillator.connect(gain);
   gain.connect(audioCtx.destination);
 
-  osc.start();
-  gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-  osc.stop(audioCtx.currentTime + 0.4);
+  oscillator.start();
 }
