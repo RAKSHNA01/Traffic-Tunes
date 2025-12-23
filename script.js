@@ -1,72 +1,94 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
-let oscillator;
 
-function processAudio() {
+let analyser;
+let micSource;
+let oscillator;
+let micStream;
+
+// Start microphone
+function startMic() {
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
   }
 
-  const fileInput = document.getElementById("audioFile");
-  if (!fileInput.files.length) {
-    alert("Please upload a traffic noise file");
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      micStream = stream;
+      micSource = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+
+      micSource.connect(analyser);
+
+      document.getElementById("result").innerHTML =
+        "🎤 Listening to traffic noise...<br>Click <b>Stop & Analyze</b>";
+    })
+    .catch(() => {
+      alert("Microphone permission denied");
+    });
+}
+
+// Stop mic and analyze
+function stopMic() {
+  if (!analyser) {
+    alert("Microphone not started");
     return;
   }
 
-  const file = fileInput.files[0];
-  const reader = new FileReader();
+  const bufferLength = analyser.fftSize;
+  const dataArray = new Uint8Array(bufferLength);
+  analyser.getByteTimeDomainData(dataArray);
 
-  reader.onload = function(e) {
-    audioCtx.decodeAudioData(e.target.result, buffer => {
-      analyzeNoise(buffer);
-    });
-  };
-
-  reader.readAsArrayBuffer(file);
-}
-
-function analyzeNoise(buffer) {
-  const data = buffer.getChannelData(0);
   let sum = 0;
-
-  for (let i = 0; i < data.length; i++) {
-    sum += Math.abs(data[i]);
+  for (let i = 0; i < bufferLength; i++) {
+    sum += Math.abs(dataArray[i] - 128);
   }
 
-  const avg = sum / data.length;
-  let traffic, time, freq;
+  const avg = sum / bufferLength;
 
-  if (avg < 0.02) {
-    traffic = "Low Traffic 🚗";
+  // Stop mic stream
+  micStream.getTracks().forEach(track => track.stop());
+
+  classifyTraffic(avg);
+}
+
+// Decide traffic level
+function classifyTraffic(avg) {
+  let level, time, freq;
+
+  if (avg < 6) {
+    level = "Low Traffic 🚗";
     time = "5–10 minutes";
     freq = 220;
-  } else if (avg < 0.05) {
-    traffic = "Medium Traffic 🚙";
-    time = "15–25 minutes";
+  } else if (avg < 15) {
+    level = "Medium Traffic 🚙";
+    time = "20–30 minutes";
     freq = 140;
   } else {
-    traffic = "High Traffic 🚗🚗";
-    time = "40–60 minutes";
+    level = "High Traffic 🚗🚗";
+    time = "45–60 minutes";
     freq = 80;
   }
 
-  playTone(freq);
+  playSound(freq);
 
   document.getElementById("result").innerHTML = `
-    <b>Traffic Level:</b> ${traffic}<br>
+    <b>Traffic Level:</b> ${level}<br>
     <b>Estimated Clearance:</b> ${time}<br><br>
-    🎧 Adaptive calming sound playing...
+    🎧 Playing calming sound...
   `;
 }
 
-function playTone(freq) {
+// Play calming tone
+function playSound(freq) {
   if (oscillator) oscillator.stop();
 
   oscillator = audioCtx.createOscillator();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
   const gain = audioCtx.createGain();
+
+  oscillator.type = "sine";
+  oscillator.frequency.value = freq;
   gain.gain.value = 0.05;
 
   oscillator.connect(gain);
