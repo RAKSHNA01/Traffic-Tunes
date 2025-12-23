@@ -1,51 +1,76 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: url("bg.jpg") no-repeat center center/cover;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: url("https://images.unsplash.com/photo-1506521781263-d8422e82f27a")
+              center/cover no-repeat;
   height: 100vh;
 }
 
 .overlay {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.65);
   height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
-  color: white;
-  width: 90%;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
+  border-radius: 18px;
+  width: 95%;
   max-width: 420px;
+  padding: 20px;
+  color: white;
+  text-align: center;
 }
 
-h1 {
-  margin-bottom: 10px;
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 15px;
 }
 
-input, button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  border-radius: 6px;
+.tab {
+  background: transparent;
   border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.tab.active {
+  border-bottom: 2px solid #00c6ff;
+}
+
+/* Tab content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
 }
 
 button {
-  background: #00e676;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
   font-weight: bold;
+  background: #00c6ff;
   cursor: pointer;
 }
 
-button:hover {
-  background: #00c853;
+#graph {
+  background: rgba(255,255,255,0.1);
+  margin-top: 15px;
+  border-radius: 10px;
 }
 
 #result {
-  margin-top: 20px;
-  font-size: 16px;
+  margin-top: 15px;
 }
