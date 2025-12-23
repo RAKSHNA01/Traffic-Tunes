@@ -1,27 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TrafficTunes 🎶</title>
+  <title>TrafficTunes</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="overlay">
+
   <div class="container">
-    <h1>🚦 TrafficTunes</h1>
-    <p>Sense traffic noise & relax</p>
 
-    <!-- FILE UPLOAD -->
-    <input type="file" id="audioFile">
-    
-    <p>OR</p>
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="openTab('welcome')">Welcome</button>
+      <button class="tab" onclick="openTab('traffic')">Traffic</button>
+      <button class="tab" onclick="openTab('about')">About</button>
+    </div>
 
-    <!-- MIC BUTTON -->
-    <button onclick="startMic()">Use Microphone</button>
-    <button onclick="stopMic()">Stop & Analyze</button>
+    <!-- WELCOME TAB -->
+    <div id="welcome" class="tab-content active">
+      <h1>🚦 TrafficTunes</h1>
+      <p>
+        Welcome to TrafficTunes!<br>
+        We convert traffic noise into calming sounds to reduce stress.
+      </p>
+      <p>
+        👉 Go to the Traffic tab to start analysis
+      </p>
+    </div>
 
-    <div id="result">Waiting...</div>
+    <!-- TRAFFIC TAB -->
+    <div id="traffic" class="tab-content">
+      <h2>Traffic Noise Analysis</h2>
+
+      <button onclick="startMic()">Use Microphone</button>
+      <button onclick="stopMic()">Stop & Analyze</button>
+
+      <canvas id="graph" width="300" height="150"></canvas>
+
+      <div id="result">Waiting for input...</div>
+    </div>
+
+    <!-- ABOUT TAB -->
+    <div id="about" class="tab-content">
+      <h2>About</h2>
+      <p>
+        TrafficTunes analyzes ambient traffic noise and generates
+        adaptive calming audio based on congestion level.
+      </p>
+    </div>
+
   </div>
+
 </div>
 
 <script src="script.js"></script>
