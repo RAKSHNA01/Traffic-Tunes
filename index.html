@@ -2,22 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>TrafficTunes 🎵</title>
+  <title>TrafficTunes 🎶</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="overlay">
-    <h1>🚦 TrafficTunes</h1>
-    <p class="tagline">Turning Traffic Noise into Music</p>
+    <div class="container">
+      <h1>🚦 TrafficTunes</h1>
+      <p>Upload traffic noise & relax with adaptive sound</p>
 
-    <div class="card">
-      <button onclick="analyzeFile()">Upload Traffic Noise</button>
-      <button onclick="startMic()">Sense Live Traffic Noise</button>
+      <input type="file" id="audioFile" accept="audio/*">
+      <button onclick="processAudio()">Analyze & Play</button>
 
-      <div id="output">
-        <p><strong>Status:</strong> Waiting for input...</p>
-      </div>
+      <div id="result">Waiting for audio...</div>
     </div>
   </div>
 
